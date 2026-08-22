@@ -14,3 +14,4 @@ pywin32>=300; sys_platform == 'win32'
 # psutil>=5.0.0
 # rich>=10.0.0
 # click>=8.0.0
+# wmi>=1.5.1; sys_platform == 'win32'

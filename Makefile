@@ -41,7 +41,14 @@ PYTHON_FILES := \
 \t$(SRC_DIR)/login_manager/login_app.py \
 \t$(SRC_DIR)/winget_wrapper/__init__.py \
 \t$(SRC_DIR)/winget_wrapper/winget.py \
-\t$(SRC_DIR)/cli.py
+\t$(SRC_DIR)/cli.py \
+\t$(SRC_DIR)/system/__init__.py \
+\t$(SRC_DIR)/system/identity.py \
+\t$(SRC_DIR)/system/components.py \
+\t$(SRC_DIR)/system/vital.py \
+\t$(SRC_DIR)/transform/__init__.py \
+\t$(SRC_DIR)/transform/profile.py \
+\t$(SRC_DIR)/transform/transformer.py
 
 # Standalone files
 STANDALONE_SCRIPTS := \
@@ -58,6 +65,11 @@ STANDALONE_SCRIPTS := \
 \t$(STANDALONE_DIR)/start_freent.bat \
 \t$(STANDALONE_DIR)/start_freent.sh \
 \t$(STANDALONE_DIR)/README.md
+
+# Transform scripts
+TRANSFORM_SCRIPTS := \
+\t$(SCRIPTS_DIR)/transform/transform.ps1 \
+\t$(SCRIPTS_DIR)/transform/rollback.ps1
 
 # Default target
 all: build
@@ -79,17 +91,16 @@ $(STANDALONE_DIR)/.standalone_built: $(STANDALONE_SCRIPTS) $(PYTHON_FILES)
 	@mkdir -p $(STANDALONE_DIR)/etc
 	@mkdir -p $(STANDALONE_DIR)/var
 	@echo "Building standalone FreeNT..."
-	@# Copy scripts to bin directory for easier access
-	cp $(STANDALONE_DIR)/freent.bat $(STANDALONE_DIR)/bin/ 2>/dev/null || true
-	cp $(STANDALONE_DIR)/freent.sh $(STANDALONE_DIR)/bin/ 2>/dev/null || true
-	cp $(STANDALONE_DIR)/freent-minimal.sh $(STANDALONE_DIR)/bin/ 2>/dev/null || true
-	cp $(STANDALONE_DIR)/freent-busybox.sh $(STANDALONE_DIR)/bin/ 2>/dev/null || true
-	cp $(STANDALONE_DIR)/freent-cli.bat $(STANDALONE_DIR)/bin/ 2>/dev/null || true
-	cp $(STANDALONE_DIR)/freent-cli.sh $(STANDALONE_DIR)/bin/ 2>/dev/null || true
-	cp $(STANDALONE_DIR)/freent-cli-minimal.sh $(STANDALONE_DIR)/bin/ 2>/dev/null || true
-	cp $(STANDALONE_DIR)/freent-winget.bat $(STANDALONE_DIR)/bin/ 2>/dev/null || true
-	cp $(STANDALONE_DIR)/freent-winget.sh $(STANDALONE_DIR)/bin/ 2>/dev/null || true
-	cp $(STANDALONE_DIR)/freent-winget-minimal.sh $(STANDALONE_DIR)/bin/ 2>/dev/null || true
+	@cp $(STANDALONE_DIR)/freent.bat $(STANDALONE_DIR)/bin/ 2>/dev/null || true
+	@cp $(STANDALONE_DIR)/freent.sh $(STANDALONE_DIR)/bin/ 2>/dev/null || true
+	@cp $(STANDALONE_DIR)/freent-minimal.sh $(STANDALONE_DIR)/bin/ 2>/dev/null || true
+	@cp $(STANDALONE_DIR)/freent-busybox.sh $(STANDALONE_DIR)/bin/ 2>/dev/null || true
+	@cp $(STANDALONE_DIR)/freent-cli.bat $(STANDALONE_DIR)/bin/ 2>/dev/null || true
+	@cp $(STANDALONE_DIR)/freent-cli.sh $(STANDALONE_DIR)/bin/ 2>/dev/null || true
+	@cp $(STANDALONE_DIR)/freent-cli-minimal.sh $(STANDALONE_DIR)/bin/ 2>/dev/null || true
+	@cp $(STANDALONE_DIR)/freent-winget.bat $(STANDALONE_DIR)/bin/ 2>/dev/null || true
+	@cp $(STANDALONE_DIR)/freent-winget.sh $(STANDALONE_DIR)/bin/ 2>/dev/null || true
+	@cp $(STANDALONE_DIR)/freent-winget-minimal.sh $(STANDALONE_DIR)/bin/ 2>/dev/null || true
 	@touch $@
 
 # Development targets
@@ -233,6 +244,32 @@ run-standalone-minimal:
 		$(STANDALONE_DIR)/freent.sh; \
 	fi
 
+# System transformation targets
+transform: build
+	@echo "Transforming system to FreeNT (standard profile)..."
+	powershell -ExecutionPolicy Bypass -File scripts/transform/transform.ps1 -Profile standard
+
+transform-minimal: build
+	@echo "Transforming system to FreeNT (minimal profile)..."
+	powershell -ExecutionPolicy Bypass -File scripts/transform/transform.ps1 -Profile minimal
+
+transform-full: build
+	@echo "Transforming system to FreeNT (full profile)..."
+	powershell -ExecutionPolicy Bypass -File scripts/transform/transform.ps1 -Profile full
+
+rollback:
+	@echo "Rolling back FreeNT transformation..."
+	powershell -ExecutionPolicy Bypass -File scripts/transform/rollback.ps1
+
+# Vital-Utilities targets
+install-vital-utilities:
+	@echo "Installing Vital-Utilities..."
+	$(PYTHON) -m $(SRC_DIR).system.vital
+
+update-vital-utilities:
+	@echo "Updating Vital-Utilities..."
+	$(PYTHON) -m $(SRC_DIR).system.vital --update
+
 # Version info
 version:
 	@echo "FreeNT version $(VERSION)"
@@ -271,5 +308,13 @@ help:
 	@echo "  run-standalone   - Run standalone FreeNT"
 	@echo "  version          - Show version information"
 	@echo "  help             - Show this help message"
+	@echo ""
+	@echo "System Transformation:"
+	@echo "  transform        - Transform to FreeNT (standard)"
+	@echo "  transform-minimal - Transform to FreeNT (minimal)"
+	@echo "  transform-full   - Transform to FreeNT (full)"
+	@echo "  rollback         - Rollback transformation"
+	@echo "  install-vital-utilities - Install Vital-Utilities"
+	@echo "  update-vital-utilities - Update Vital-Utilities"
 
-.PHONY: all build standalone develop install-deps install-dev-deps test test-unit test-integration test-all clean clean-all clean-standalone install uninstall package standalone-package docs lint format check-types run-login-manager run-winget-test run-cli run-standalone run-standalone-windows run-standalone-unix run-standalone-minimal version help
+.PHONY: all build standalone develop install-deps install-dev-deps test test-unit test-integration test-all clean clean-all clean-standalone install uninstall package standalone-package docs lint format check-types run-login-manager run-winget-test run-cli run-standalone run-standalone-windows run-standalone-unix run-standalone-minimal version help transform transform-minimal transform-full rollback install-vital-utilities update-vital-utilities
