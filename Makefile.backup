@@ -48,13 +48,7 @@ PYTHON_FILES := \
 \t$(SRC_DIR)/system/vital.py \
 \t$(SRC_DIR)/transform/__init__.py \
 \t$(SRC_DIR)/transform/profile.py \
-\t$(SRC_DIR)/transform/transformer.py \
-\t$(SRC_DIR)/wim/__init__.py \
-\t$(SRC_DIR)/wim/wim_manager.py \
-\t$(SRC_DIR)/wim/iso_mounter.py \
-\t$(SRC_DIR)/wim/edition_customizer.py \
-\t$(SRC_DIR)/wim/bloatware_remover.py \
-\t$(SRC_DIR)/wim/freent_injector.py
+\t$(SRC_DIR)/transform/transformer.py
 
 # Standalone files
 STANDALONE_SCRIPTS := \
@@ -76,10 +70,6 @@ STANDALONE_SCRIPTS := \
 TRANSFORM_SCRIPTS := \
 \t$(SCRIPTS_DIR)/transform/transform.ps1 \
 \t$(SCRIPTS_DIR)/transform/rollback.ps1
-
-# WIM scripts
-WIM_SCRIPTS := \
-\t$(SCRIPTS_DIR)/wim/create_freent_wim.ps1
 
 # Default target
 all: build
@@ -280,23 +270,6 @@ update-vital-utilities:
 	@echo "Updating Vital-Utilities..."
 	$(PYTHON) -m $(SRC_DIR).system.vital --update
 
-# WIM/ESD Injector targets
-create-freent-wim:
-	@echo "Creating FreeNT WIM from Enterprise ISO..."
-	powershell -ExecutionPolicy Bypass -File scripts/wim/create_freent_wim.ps1 -ISOPath $(ISO_PATH) -OutputWIM $(OUTPUT_WIM) -WindowsVersion $(WINDOWS_VERSION)
-
-wim-info:
-	@echo "Getting WIM information..."
-	$(PYTHON) -m $(SRC_DIR).wim.wim_manager --info $(WIM_PATH)
-
-mount-wim:
-	@echo "Mounting WIM image..."
-	$(PYTHON) -m $(SRC_DIR).wim.wim_manager --mount $(WIM_PATH) $(IMAGE_INDEX) $(MOUNT_DIR)
-
-unmount-wim:
-	@echo "Unmounting WIM image..."
-	$(PYTHON) -m $(SRC_DIR).wim.wim_manager --unmount $(MOUNT_DIR)
-
 # Version info
 version:
 	@echo "FreeNT version $(VERSION)"
@@ -343,11 +316,5 @@ help:
 	@echo "  rollback         - Rollback transformation"
 	@echo "  install-vital-utilities - Install Vital-Utilities"
 	@echo "  update-vital-utilities - Update Vital-Utilities"
-	@echo ""
-	@echo "WIM/ESD Injector:"
-	@echo "  create-freent-wim - Create FreeNT WIM from Enterprise ISO"
-	@echo "  wim-info         - Get WIM information"
-	@echo "  mount-wim        - Mount WIM image"
-	@echo "  unmount-wim      - Unmount WIM image"
 
-.PHONY: all build standalone develop install-deps install-dev-deps test test-unit test-integration test-all clean clean-all clean-standalone install uninstall package standalone-package docs lint format check-types run-login-manager run-winget-test run-cli run-standalone run-standalone-windows run-standalone-unix run-standalone-minimal version help transform transform-minimal transform-full rollback install-vital-utilities update-vital-utilities create-freent-wim wim-info mount-wim unmount-wim
+.PHONY: all build standalone develop install-deps install-dev-deps test test-unit test-integration test-all clean clean-all clean-standalone install uninstall package standalone-package docs lint format check-types run-login-manager run-winget-test run-cli run-standalone run-standalone-windows run-standalone-unix run-standalone-minimal version help transform transform-minimal transform-full rollback install-vital-utilities update-vital-utilities
