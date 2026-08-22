@@ -1,0 +1,16 @@
+# FreeNT Requirements
+# Copyright (c) 2026, Panoc95
+# BSD 3-Clause License
+
+# Core dependencies
+textual>=0.1.0
+textual-web>=0.1.0
+
+# Windows-specific dependencies
+pywin32>=300; sys_platform == 'win32'
+
+# Optional dependencies for enhanced functionality
+# These are not required but provide additional features
+# psutil>=5.0.0
+# rich>=10.0.0
+# click>=8.0.0
