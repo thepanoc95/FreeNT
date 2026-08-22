@@ -1,0 +1,107 @@
+# FreeNT Git Ignore
+# Copyright (c) 2026, Panoc95
+# BSD 3-Clause License
+
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+build/
+develop-eggs/
+dist/
+downloads/
+eggs/
+.eggs/
+lib/
+lib64/
+parts/
+sdist/
+var/
+wheels/
+*.egg-info/
+.installed.cfg
+*.egg
+
+# Virtual environments
+venv/
+ENV/
+env/
+.venv/
+
+# IDE
+.idea/
+.vscode/
+*.swp
+*.swo
+*~
+
+# Testing
+.pytest_cache/
+.coverage
+htmlcov/
+.tox/
+.nox/
+
+# Type checking
+.mypy_cache/
+.dmypy.json
+dmypy.json
+
+# Linting
+.flake8
+
+# Build system
+Makefile
+
+# Configuration files
+*.json
+*.yaml
+*.yml
+*.toml
+*.cfg
+*.ini
+!requirements*.txt
+!setup.py
+!setup.cfg
+!pyproject.toml
+
+# Logs
+*.log
+logs/
+
+# Temporary files
+*.tmp
+*.temp
+.cache/
+
+# OS specific
+.DS_Store
+Thumbs.db
+
+# Windows
+AppData/
+Local Settings/
+*.lnk
+
+# FreeNT specific
+install-log.json
+freent.json
+gnu-toolchain-config.json
+gnuless-toolchain-config.json
+
+# Generated files
+*.exe
+*.dll
+*.bat
+*.cmd
+*.ps1
+!scripts/*.ps1
+
+# Documentation
+.docs/
+build-docs/
+
+# Installers
+installers/
