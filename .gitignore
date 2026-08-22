@@ -49,59 +49,21 @@ htmlcov/
 .dmypy.json
 dmypy.json
 
-# Linting
-.flake8
-
-# Build system
-Makefile
-
-# Configuration files
-*.json
-*.yaml
-*.yml
-*.toml
-*.cfg
-*.ini
-!requirements*.txt
-!setup.py
-!setup.cfg
-!pyproject.toml
-
-# Logs
-*.log
-logs/
-
-# Temporary files
-*.tmp
-*.temp
-.cache/
-
-# OS specific
-.DS_Store
-Thumbs.db
+# Standalone - don't ignore our standalone files
+# (but ignore generated files within standalone)
+!standalone/
+standalone/lib/
+standalone/var/
+standalone/build/
+standalone/bin/
 
 # Windows
 AppData/
 Local Settings/
 *.lnk
 
-# FreeNT specific
-install-log.json
-freent.json
-gnu-toolchain-config.json
-gnuless-toolchain-config.json
-
-# Generated files
-*.exe
-*.dll
-*.bat
-*.cmd
-*.ps1
-!scripts/*.ps1
-
-# Documentation
-.docs/
-build-docs/
-
-# Installers
-installers/
+# FreeNT specific (keep these for tracking)
+!install-log.json
+!freent.json
+!gnu-toolchain-config.json
+!gnuless-toolchain-config.json
