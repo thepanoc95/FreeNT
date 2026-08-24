@@ -1,361 +1,91 @@
 # FreeNT
 
-An Free and Open-Source alternative userland for Windows NT-series operating systems (Windows 10 and Windows 11, with 32-bit support).
+FreeNT is an experimental, open-source **full userland replacement for
+Windows NT**. It provides its own implementations of the user-mode components
+that Microsoft ships in `%SystemRoot%\System32` — including the Win32
+subsystem DLLs (kernel32, user32, gdi32), the session manager (smss), the
+Windows subsystem (csrss/winlogon), the service control manager, and the
+graphical shell (explorer) — plus a Tiny C Runtime (FreeDLL) and a PE dynamic
+linker (NTDYLIB).
 
-## Features
+The userland is written in freestanding C: it has no Python runtime, C
+runtime, or dependency on the proprietary Microsoft `kernel32.dll`,
+`ucrtbase.dll`, or `msvcrt.dll`. All components import only `ntdll.dll` for
+actual NT kernel system calls. The kernel and essential boot drivers remain
+Microsoft-provided; everything above them is FreeNT.
 
-- **Custom Login Manager**: Built with Python Textual, providing a modern and customizable login experience
-- **Winget Wrapper**: A convenient Python interface to Microsoft's winget package manager
-- **Dual Toolchain Support**: Works with both GNU (gcc, gnumake) and GNU-less (clang, bsdmake) toolchains
-- **Flexible Installation**: Multiple installation options and configurations
-- **Open Source**: Licensed under BSD 3-Clause License
+## Build
 
-## Requirements
+### Prerequisites
 
-- **Operating System**: Windows 10 or Windows 11 (Windows 11 recommended)
-- **Architecture**: x64, x86, ARM64 (x64 recommended)
-- **Python**: Python 3.8 or later
-- **PowerShell**: PowerShell 5.1 or later (for installation scripts)
+- Linux host with `x86_64-w64-mingw32-gcc` (MinGW-w64 cross-compiler)
+- GNU Make (`gmake`) — system `make` on BSD systems may not support
+  `ifeq` conditionals
+- PDCurses (for the WinPE TUI installer)
 
-## Installation
+### Building PDCurses (one-time)
 
-### Quick Install
-
-1. **Clone the repository**:
-   ```powershell
-   git clone https://github.com/thepanoc95/FreeNT.git
-   cd FreeNT
-   ```
-
-2. **Run the installer** (as Administrator):
-   ```powershell
-   .\scripts\install_freent.ps1
-   ```
-
-3. **Follow the prompts** to configure your installation.
-
-### Manual Installation
-
-1. **Install Python** (if not already installed):
-   - Download from [python.org](https://www.python.org/downloads/)
-   - Make sure to check "Add Python to PATH" during installation
-
-2. **Install dependencies**:
-   ```powershell
-   pip install -r requirements.txt
-   ```
-
-3. **Install in development mode**:
-   ```powershell
-   pip install -e .
-   ```
-
-4. **Install toolchain** (choose one):
-   - **GNU Toolchain**:
-     ```powershell
-     .\scripts\install_gnu.ps1
-     ```
-   - **GNU-less Toolchain**:
-     ```powershell
-     .\scripts\install_gnuless.ps1
-     ```
-
-## Usage
-
-### Command Line Interface
-
-FreeNT provides a CLI with the following commands:
-
-```bash
-# Show version
-freent --version
-
-# Show system information
-freent info
-
-# Start login manager
-freent login
-
-# Winget wrapper commands
-freent winget search python
-freent winget install Python.Python.3.11
-freent winget uninstall Python.Python.3.11
-freent winget list
-freent winget upgrade
-
-# Configuration commands
-freent config show
-freent config set toolchain.type gnu
-freent config get toolchain.type
+```sh
+cd /tmp
+git clone https://github.com/wmcbrine/PDCurses.git pdcurses
+cd pdcurses/wincon
+gmake CC=x86_64-w64-mingw32-gcc
+ln -sf pdcurses.a libpdcurses.a   # linker expects libpdcurses.a
 ```
 
-### Login Manager
+### Building all components
 
-Start the graphical login manager:
+```sh
+# 1. Build freent.exe, freedll.dll, and ntdylib.dll
+gmake
 
-```bash
-freent login
+# 2. Build the WinPE TUI installer (requires PDCurses)
+gmake installer PDCURSES_DIR=/tmp/pdcurses
+
+# 3. Build liberty.exe (POSIX subsystem launcher)
+cd liberty && gmake
 ```
 
-Or run directly:
+### Build order
 
-```bash
-python -m src.login_manager.login_app
+1. `freedll.dll` — Tiny C Runtime + NT-compatible API (companion DLL to ntdll)
+2. `ntdylib.dll` — PE dynamic linker (depends on freedll)
+3. `freent.exe` — FreeNT executive shell
+4. `freent_installer.exe` — WinPE TUI installer (depends on freedll, ntdylib, PDCurses)
+5. `liberty.exe` — POSIX subsystem launcher (depends on freedll, ntdylib)
+
+### Build artifacts
+
+| Component | Output | Size |
+|-----------|--------|------|
+| freent.exe | `build/x64/freent.exe` | ~8 KB |
+| freedll.dll | `build/x64/freedll.dll` | ~35 KB |
+| ntdylib.dll | `build/x64/ntdylib.dll` | ~20 KB |
+| freent_installer.exe | `build/x64/freent_installer.exe` | ~275 KB |
+| liberty.exe | `build/x64/liberty.exe` | ~146 KB |
+
+### Notes
+
+- All Makefiles require GNU Make (`gmake`). BSD `make` does not support
+  `ifeq` conditionals.
+- DLLs use `-nostdlib` to avoid linking the C runtime; they import only
+  `ntdll.dll`.
+- The `.def` files use MinGW-compatible syntax (no `NONWAIT` keyword).
+
+## Commands
+
+```text
+freent.exe info
+freent.exe login
+freent.exe version
 ```
 
-### Winget Wrapper
+`login` is the initial `logind`-style component: a terminal session manager
+that reads a login name through `NtReadFile`, writes through `NtWriteFile`, and
+clears the entered name after use. It deliberately does **not** accept a
+password or claim to authenticate a user.
 
-Use the winget wrapper for package management:
-
-```python
-from src.winget_wrapper import WingetWrapper
-
-wrapper = WingetWrapper()
-
-# Search for packages
-results = wrapper.search("python", limit=5)
-for pkg in results:
-    print(f"{pkg.id} - {pkg.name} ({pkg.version})")
-
-# Install a package
-wrapper.install("Python.Python.3.11")
-
-# List installed packages
-installed = wrapper.list_installed()
-for pkg in installed:
-    print(f"{pkg.id} - {pkg.name} ({pkg.version})")
-```
-
-## Project Structure
-
-```
-FreeNT/
-├── src/
-│   ├── __init__.py
-│   ├── cli.py                 # Command Line Interface
-│   ├── core/
-│   │   ├── __init__.py
-│   │   ├── config.py          # Configuration management
-│   │   └── utils.py           # Utility functions
-│   ├── login_manager/
-│   │   ├── __init__.py
-│   │   └── login_app.py       # Textual-based login manager
-│   └── winget_wrapper/
-│       ├── __init__.py
-│       └── winget.py           # Winget wrapper implementation
-├── scripts/
-│   ├── __init__.py
-│   ├── install_freent.ps1     # Main installer
-│   ├── install_gnu.ps1        # GNU toolchain installer
-│   └── install_gnuless.ps1    # GNU-less toolchain installer
-├── installers/
-├── build/
-├── docs/
-├── tests/
-├── Makefile                  # Build system (GNU/BSD compatible)
-├── setup.py                  # Setup script
-├── setup.cfg                 # Setup configuration
-├── pyproject.toml            # Project configuration
-├── requirements.txt          # Production dependencies
-├── requirements-dev.txt      # Development dependencies
-├── README.md
-└── LICENSE
-```
-
-## Configuration
-
-FreeNT uses a JSON-based configuration system. The configuration file is typically located at:
-
-- Windows: `%APPDATA%\FreeNT\config.json`
-- Other: `~/.config/FreeNT/config.json`
-
-### Configuration Options
-
-```json
-{
-  "config_version": "1.0",
-  "windows_version": "11",
-  "architecture": "x64",
-  "toolchain": {
-    "type": "gnu",
-    "gcc_path": null,
-    "gnumake_path": null,
-    "clang_path": null,
-    "bsdmake_path": null,
-    "python_path": null
-  },
-  "login_manager": {
-    "enabled": true,
-    "theme": "light",
-    "auto_login": false,
-    "auto_login_user": null,
-    "show_shutdown_button": true,
-    "show_reboot_button": true
-  },
-  "winget": {
-    "enabled": true,
-    "auto_accept_agreements": false,
-    "preferred_source": "winget",
-    "cache_dir": null
-  },
-  "debug_mode": false,
-  "log_level": "INFO"
-}
-```
-
-## Toolchain Support
-
-### GNU Toolchain
-
-The GNU toolchain includes:
-- **GCC** (GNU Compiler Collection)
-- **GNU Make**
-- **Coreutils** (GNU core utilities)
-- **Findutils**
-- **Gawk**
-- **Sed**
-- **Grep**
-- **Tar**
-- **Gzip**
-
-Installation:
-```powershell
-.\scripts\install_gnu.ps1
-```
-
-### GNU-less Toolchain
-
-The GNU-less toolchain includes:
-- **LLVM/Clang** compiler suite
-- **BSD Make** (pmake)
-- Alternative tools (curl, wget, 7zip, etc.)
-
-Installation:
-```powershell
-.\scripts\install_gnuless.ps1
-```
-
-## Build System
-
-FreeNT uses a Makefile that is compatible with both GNU Make and BSD Make.
-
-### Build Targets
-
-```bash
-# Build everything
-make all
-
-# Install production dependencies
-make install-deps
-
-# Install development dependencies
-make install-dev-deps
-
-# Run tests
-make test
-make test-unit
-make test-integration
-
-# Run linter
-make lint
-
-# Format code
-make format
-
-# Run type checker
-make check-types
-
-# Clean build artifacts
-make clean
-make clean-all
-
-# Install FreeNT
-make install
-
-# Create distribution packages
-make package
-
-# Show help
-make help
-```
-
-## Development
-
-### Setting Up Development Environment
-
-1. Clone the repository:
-   ```bash
-   git clone https://github.com/thepanoc95/FreeNT.git
-   cd FreeNT
-   ```
-
-2. Create a virtual environment:
-   ```bash
-   python -m venv venv
-   source venv/bin/activate  # On Windows: venv\Scripts\activate
-   ```
-
-3. Install development dependencies:
-   ```bash
-   pip install -r requirements.txt
-   pip install -r requirements-dev.txt
-   pip install -e .
-   ```
-
-4. Run tests:
-   ```bash
-   pytest
-   ```
-
-### Contributing
-
-1. Fork the repository
-2. Create a feature branch (`git checkout -b feature/your-feature`)
-3. Commit your changes (`git commit -am 'Add some feature'`)
-4. Push to the branch (`git push origin feature/your-feature`)
-5. Open a Pull Request
-
-### Code Style
-
-- **Line Length**: 88 characters
-- **Formatting**: Black
-- **Import Sorting**: isort
-- **Linting**: flake8
-- **Type Checking**: mypy
-
-## License
-
-FreeNT is licensed under the BSD 3-Clause License. See the [LICENSE](LICENSE) file for details.
-
-## Support
-
-- **Issues**: [GitHub Issues](https://github.com/thepanoc95/FreeNT/issues)
-- **Discussions**: [GitHub Discussions](https://github.com/thepanoc95/FreeNT/discussions)
-- **Documentation**: [GitHub Wiki](https://github.com/thepanoc95/FreeNT/wiki)
-
-## Roadmap
-
-- [ ] Complete login manager functionality
-- [ ] Add more winget wrapper features
-- [ ] Implement system service management
-- [ ] Add package repository support
-- [ ] Create documentation
-- [ ] Add localization support
-- [ ] Implement themes and customization
-- [ ] Add accessibility features
-- [ ] Create installer GUI
-- [ ] Add update mechanism
-
-## Acknowledgments
-
-- **Python Textual**: For the excellent TUI framework
-- **Microsoft**: For Windows and winget
-- **MinGW-w64**: For GNU tools on Windows
-- **LLVM**: For Clang compiler
-- **All contributors**: For their valuable contributions
-
----
-
-**FreeNT** - Making Windows Free and Open Source!
-
-Copyright (c) 2026, Panoc95
+On NT, password authentication and creation of a logon token are LSA/Winlogon
+responsibilities. They are not exposed as a safe, public `ntdll` Native API. A
+future real login path needs a privileged LSA authentication package or an
+approved broker; it must not be simulated in the console client.

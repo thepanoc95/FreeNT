@@ -1,0 +1,160 @@
+; FreeDLL Module Definition File
+; Exports the Tiny C Runtime and NT-compatible API for FreeNT
+; This is a companion DLL to ntdll.dll
+
+LIBRARY freedll.dll
+EXPORTS
+
+; ===== FreeDLL Entry Points =====
+DllEntryPoint            @1
+FreeDllMain              @2
+DllMain                  @3
+
+; ===== Process/Thread Management =====
+GetCurrentProcess        @10
+GetCurrentThread         @11
+GetCurrentProcessId      @12
+GetCurrentThreadId       @13
+ExitProcess              @14
+RtlExitUserProcess       @15
+Sleep                    @16
+GetTickCount             @17
+QueryPerformanceCounter  @18
+QueryPerformanceFrequency @19
+GetProcessShutdownParameters @20
+
+; ===== Heap Management =====
+GetProcessHeap           @21
+CreateHeap               @22
+DestroyHeap              @23
+RtlCreateHeap            @24
+RtlDestroyHeap           @25
+RtlAllocateHeap          @26
+RtlReAllocateHeap        @27
+RtlFreeHeap              @28
+RtlSizeHeap              @29
+
+; ===== Memory Operations =====
+RtlMoveMemory            @30
+RtlCopyMemory            @31
+RtlFillMemory            @32
+RtlFillMemoryUShort      @33
+RtlZeroMemory            @34
+RtlCompareMemory         @35
+RtlCompareMemoryUpr      @36
+
+; ===== String Conversion =====
+RtlMultiByteToUnicodeN   @40
+RtlUnicodeToMultiByteN   @41
+
+; ===== Unicode String Operations =====
+RtlCopyUnicodeString     @42
+RtlDuplicateUnicodeString @43
+RtlAppendUnicodeStringToString @44
+RtlAppendStringToString  @45
+RtlFormatCurrentUserKeyPath @46
+
+; ===== RTL Time/Date =====
+RtlSystemTimeToLocalTime  @50
+RtlTimeToTimeFields       @51
+RtlTimeFieldsToTime       @52
+
+; ===== RTL Version =====
+RtlGetVersion             @53
+
+; ===== Environment =====
+GetEnvironmentVariableA   @55
+GetEnvironmentVariableW   @56
+SetEnvironmentVariableA   @57
+SetEnvironmentVariableW   @58
+
+; ===== Module Management =====
+GetModuleHandleA          @60
+GetModuleHandleW          @61
+LoadLibraryA              @62
+GetProcAddress            @63
+
+; ===== Error Handling =====
+GetLastError              @64
+SetLastError              @65
+RtlNtStatusToDosError     @66
+
+; ===== SEH / Exception =====
+RtlCaptureContext         @67
+
+; ===== TLS / FLS =====
+RegisterTlsCallback       @68
+FlsAlloc                  @69
+FlsGetValue               @70
+FlsSetValue               @71
+FlsFree                   @72
+
+; ===== CRT Standard Library =====
+memmove                   @73
+memcpy                    @74
+memset                    @75
+memcmp                    @76
+memchr                    @77
+strlen                    @78
+strnlen                   @79
+strcpy                    @80
+freent_strcpy             @112
+strncpy                   @81
+freent_strncpy            @113
+strcat                    @82
+freent_strcat             @114
+strncat                   @83
+freent_strncat            @115
+strcmp                    @84
+freent_strcmp             @116
+strncmp                   @85
+freent_strncmp            @117
+strchr                    @86
+freent_strchr             @118
+strrchr                   @87
+freent_strrchr            @119
+strstr                    @88
+freent_strstr             @120
+strtok                    @89
+freent_strtok             @121
+strdup                    @90
+freent_strdup             @122
+
+wcslen                    @91
+freent_wcslen             @123
+wcscmp                    @92
+freent_wcscmp             @124
+wcsncmp                   @93
+freent_wcsncmp            @125
+wcscpy                    @94
+freent_wcscpy             @126
+wcsncpy                   @95
+freent_wcsncpy            @127
+
+atoi                      @96
+atol                      @97
+atoll                     @98
+abs                       @99
+labs                      @100
+qsort                     @101
+
+; ===== CRT Format =====
+snprintf                  @102
+freent_snprintf           @130
+vsnprintf                 @103
+freent_vsnprintf          @131
+
+; ===== CRT Lifecycle =====
+atexit                    @104
+__cxa_atexit              @105
+
+; ===== C++ Support =====
+__purecall                @106
+
+; ===== Data Exports =====
+__argc                    @107 DATA
+__argv                    @108 DATA
+__wargv                   @109 DATA
+__environ                  @110 DATA
+__p__environ              @111 DATA
+

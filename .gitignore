@@ -67,3 +67,5 @@ Local Settings/
 !freent.json
 !gnu-toolchain-config.json
 !gnuless-toolchain-config.json
+
+.system/

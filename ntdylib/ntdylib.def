@@ -1,0 +1,21 @@
+; FreeDLL NTDYLIB Module Definition File
+; NT Dynamic Library Loader - uses FreeDLL services
+
+LIBRARY ntdylib.dll
+EXPORTS
+
+; Core loader API
+NtdylibInit                 @1 
+NtdylibCleanup              @2 
+NtdylibLoadDll              @3 
+NtdylibGetProcAddress       @4 
+NtdylibUnloadDll            @5 
+NtdylibGetModuleHandle      @6 
+NtdylibGetModules           @7 
+NtdylibGetModuleInfo        @8 
+
+; PE parsing functions
+NtdylibParseHeaders         @9 
+NtdylibResolveImports       @10
+NtdylibProcessRelocs        @11
+NtdylibFindExport           @12

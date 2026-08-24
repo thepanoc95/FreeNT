@@ -1,0 +1,52 @@
+; FreeNT TTY Subsystem Module Definition
+; Exports TTY control functions for NT Native Mode applications
+; Links with freedll.dll runtime
+
+LIBRARY tty.dll
+EXPORTS
+
+; ===== Core TTY Management =====
+NttyInitialize                 @200
+NttyShutdown                   @201
+NttyCreateDevice               @202
+NttyCloseDevice                @203
+NttyOpenDevice                 @204
+
+; ===== I/O Operations =====
+NttyRead                        @210
+NttyWrite                       @211
+NttyGetChar                     @212
+NttyPutChar                     @213
+
+; ===== Terminal Control =====
+NttyGetTermios                  @220
+NttySetTermios                  @221
+NttyGetWinsize                  @222
+NttySetWinsize                  @223
+NttyIoctl                       @224
+
+; ===== Signal/Control Operations =====
+NttySendSignal                  @230
+NttyHandleBreak                 @231
+NttyFlush                       @232
+
+; ===== Line Discipline Management =====
+NttySetLineDisc                 @240
+NttyGetLineDisc                 @241
+
+; ===== Process Group Management =====
+NttySetForegroundGroup          @250
+NttyGetForegroundGroup          @251
+
+; ===== Buffer Management =====
+NttyFlushInputBuffer            @260
+NttyFlushOutputBuffer           @261
+NttyGetInputCount               @262
+NttyGetOutputCount              @263
+
+; ===== Mode/Discipline Functions =====
+NttySetMode                     @270
+NttyGetMode                     @271
+
+; ===== Statistics =====
+NttyGetStats                    @280

@@ -1,0 +1,14 @@
+Windows Registry Editor Version 5.00
+
+[HKEY_LOCAL_MACHINE\SOFTWARE\Microsoft\Windows NT\CurrentVersion]
+"ProductName"="FreeNT"
+"DisplayVersion"="0.1.0-testing"
+"ReleaseId"="0.1.0-testing"
+"CurrentBuild"="010"
+"CurrentBuildNumber"="010"
+
+"RegisteredOwner"="FreeNT Developer"
+"RegisteredOrganization"="FreeNT Project"
+
+[HKEY_LOCAL_MACHINE\SOFTWARE\Microsoft\Windows\CurrentVersion\Component Based Servicing]
+"CurrentVersion"="0.1.0-testing"
