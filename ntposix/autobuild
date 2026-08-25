@@ -1,0 +1,44 @@
+#!/bin/sh
+
+set -e
+
+case "$1" in
+    x64)
+        x86_64-w64-mingw32-gcc \
+            -ffreestanding \
+            -fno-builtin \
+            -fno-stack-protector \
+            -c ntposix.c \
+            -o ntposix.o
+
+        x86_64-w64-mingw32-gcc \
+            -nostdlib \
+            -nodefaultlibs \
+            -Wl,-e,NtProcessStartup \
+            ntposix.o \
+            -lntdll \
+            -o ntposix64.exe
+        ;;
+
+    x86)
+        i686-w64-mingw32-gcc \
+            -ffreestanding \
+            -fno-builtin \
+            -fno-stack-protector \
+            -c ntposix.c \
+            -o ntposix.o
+
+        i686-w64-mingw32-gcc \
+            -nostdlib \
+            -nodefaultlibs \
+            -Wl,-e,NtProcessStartup \
+            ntposix.o \
+            -lntdll \
+            -o ntposix32.exe
+        ;;
+
+    *)
+        echo "specify target arch type (x86, x64)"
+        exit 1
+        ;;
+esac
