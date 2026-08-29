@@ -24,7 +24,7 @@ can have a full runtime without depending on the Windows CRT layer.
   `strlen`, `strnlen`, `strcpy`, `strncpy`, `strcat`, `strncat`,
   `strcmp`, `strncmp`, `strchr`, `strrchr`, `strstr`, `strtok`, `strdup`,
   plus wide string variants (`wcslen`, `wcscmp`, `wcsncmp`, `wcscpy`, `wcsncpy`),
-  and standard library functions (`atoi`, `atol`, `atoll`, `abs`, `labs`, `qsort`)
+  and standard library functions (`atoi`, `atol`, `atoll`, `abs`, `labs`, `qsort`, `bsearch`, `rand`, `srand`).  It also supplies ANSI C allocation (`malloc`, `calloc`, `realloc`, `free`) and string-set functions (`strspn`, `strcspn`, `strpbrk`).
 
 - **`src/crt_format.c`** — CRT format functions:
   `snprintf`, `vsnprintf` — a self-contained printf-style formatter with

@@ -34,7 +34,7 @@ FREEDLL_OBJECTS := \
 	$(BUILD_DIR)/crt_memory.obj \
 	$(BUILD_DIR)/crt_string.obj \
 	$(BUILD_DIR)/crt_format.obj \
-	$(BUILD_DIR)/crt_compat.obj \
+	$(BUILD_DIR)/crt_compat.obj $(BUILD_DIR)/crt_stdlib.obj \
 	$(BUILD_DIR)/crt_globals.obj \
 	$(BUILD_DIR)/heap.obj \
 	$(BUILD_DIR)/process.obj \
@@ -65,6 +65,9 @@ $(BUILD_DIR)/crt_format.obj: src/crt_format.c $(BUILD_DIR)
 	$(CC) $(CFLAGS) -c $< -o $@
 
 $(BUILD_DIR)/crt_compat.obj: src/crt_compat.c $(BUILD_DIR)
+	$(CC) $(CFLAGS) -c $< -o $@
+
+$(BUILD_DIR)/crt_stdlib.obj: src/crt_stdlib.c $(BUILD_DIR)
 	$(CC) $(CFLAGS) -c $< -o $@
 
 $(BUILD_DIR)/crt_globals.obj: src/crt_globals.c $(BUILD_DIR)

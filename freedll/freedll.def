@@ -119,6 +119,16 @@ strtok                    @89
 freent_strtok             @121
 strdup                    @90
 freent_strdup             @122
+strspn                    @132
+strcspn                   @133
+strpbrk                   @134
+malloc                    @135
+free                      @136
+calloc                    @137
+realloc                   @138
+bsearch                   @139
+rand                      @140
+srand                     @141
 
 wcslen                    @91
 freent_wcslen             @123

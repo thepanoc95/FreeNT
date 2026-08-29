@@ -179,3 +179,17 @@ int vsnprintf(char *buffer, size_t size, const char *format, va_list ap)
 {
     return freent_vsnprintf(buffer, size, format, ap);
 }
+
+
+size_t strspn(const char *s, const char *accept) { return freent_strspn(s, accept); }
+size_t strcspn(const char *s, const char *reject) { return freent_strcspn(s, reject); }
+char *strpbrk(const char *s, const char *accept) { return freent_strpbrk(s, accept); }
+void *malloc(size_t size) { return freent_malloc(size); }
+void free(void *ptr) { freent_free(ptr); }
+void *calloc(size_t count, size_t size) { return freent_calloc(count, size); }
+void *realloc(void *ptr, size_t size) { return freent_realloc(ptr, size); }
+void *bsearch(const void *key, const void *base, size_t count, size_t size,
+              int (*compar)(const void *, const void *))
+{ return freent_bsearch(key, base, count, size, compar); }
+int rand(void) { return freent_rand(); }
+void srand(unsigned int seed) { freent_srand(seed); }

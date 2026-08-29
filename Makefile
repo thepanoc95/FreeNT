@@ -38,7 +38,7 @@ $(TARGET): $(OBJECTS)
 FREEDLL_DIR := freedll
 FREEDLL_CFLAGS := -std=gnu11 -ffreestanding -fno-builtin -fno-stack-protector -fno-asynchronous-unwind-tables -fno-exceptions -fno-ident -fms-extensions -Wno-discarded-qualifiers -Wall -Wextra -D_WIN64 -D_WIN32_WINNT=0x0600 -DUNICODE -D_UNICODE -DVFT_DLL=0x00000002L -DVFT2_UNKNOWN=0x00000000L -I $(FREEDLL_DIR)/include -I $(FREEDLL_DIR)/include/$(ARCH)
 FREEDLL_DEFFILE := $(FREEDLL_DIR)/freedll.def
-FREEDLL_OBJECTS := $(BUILD_DIR)/crt_memory.obj $(BUILD_DIR)/crt_string.obj $(BUILD_DIR)/crt_format.obj $(BUILD_DIR)/crt_compat.obj $(BUILD_DIR)/crt_globals.obj $(BUILD_DIR)/heap.obj $(BUILD_DIR)/process.obj $(BUILD_DIR)/stringconv.obj $(BUILD_DIR)/rtl.obj $(BUILD_DIR)/dllmain.obj $(BUILD_DIR)/vmem.obj
+FREEDLL_OBJECTS := $(BUILD_DIR)/crt_memory.obj $(BUILD_DIR)/crt_string.obj $(BUILD_DIR)/crt_format.obj $(BUILD_DIR)/crt_compat.obj $(BUILD_DIR)/crt_stdlib.obj $(BUILD_DIR)/crt_globals.obj $(BUILD_DIR)/heap.obj $(BUILD_DIR)/process.obj $(BUILD_DIR)/stringconv.obj $(BUILD_DIR)/rtl.obj $(BUILD_DIR)/dllmain.obj $(BUILD_DIR)/vmem.obj
 
 $(BUILD_DIR)/crt_memory.obj: $(FREEDLL_DIR)/src/crt_memory.c $(BUILD_DIR)
 	$(CC) $(FREEDLL_CFLAGS) -c $(FREEDLL_DIR)/src/crt_memory.c -o $@
@@ -51,6 +51,9 @@ $(BUILD_DIR)/crt_format.obj: $(FREEDLL_DIR)/src/crt_format.c $(BUILD_DIR)
 
 $(BUILD_DIR)/crt_compat.obj: $(FREEDLL_DIR)/src/crt_compat.c $(BUILD_DIR)
 	$(CC) $(FREEDLL_CFLAGS) -c $(FREEDLL_DIR)/src/crt_compat.c -o $@
+
+$(BUILD_DIR)/crt_stdlib.obj: $(FREEDLL_DIR)/src/crt_stdlib.c $(BUILD_DIR)
+	$(CC) $(FREEDLL_CFLAGS) -c $(FREEDLL_DIR)/src/crt_stdlib.c -o $@
 
 $(BUILD_DIR)/crt_globals.obj: $(FREEDLL_DIR)/src/crt_globals.c $(BUILD_DIR)
 	$(CC) $(FREEDLL_CFLAGS) -c $(FREEDLL_DIR)/src/crt_globals.c -o $@

@@ -229,6 +229,7 @@ typedef struct _NTTY_DEVICE {
     HANDLE input_ready_event;
     HANDLE output_ready_event;
     HANDLE control_lock;
+    struct _NTTY_DEVICE *next;
 
 } NTTY_DEVICE, *PNTTY_DEVICE;
 
