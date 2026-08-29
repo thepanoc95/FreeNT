@@ -13,3 +13,12 @@ runtime, or dependency on the proprietary Microsoft `kernel32.dll`,
 `ucrtbase.dll`, or `msvcrt.dll`. All components import only `ntdll.dll` for
 actual NT kernel system calls. The kernel and essential boot drivers remain
 Microsoft-provided; everything above them is FreeNT.
+
+## Native compatibility components
+
+- **FreeDLL** now exposes additional ANSI C allocation, search, pseudo-random,
+  and string-set primitives for freestanding Native Mode programs.
+- **NTVM** provides a FreeDLL-backed real-mode `.COM` loader and CPU context
+  contract, forming the portable host boundary for an NTVDM-style interpreter.
+- **NTTTY** supplies BSD/POSIX-like termios state, canonical/raw line
+  disciplines, terminal buffers, and process-group controls for Native Mode.

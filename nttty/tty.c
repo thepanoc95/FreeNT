@@ -36,6 +36,7 @@ NttyAcquireLock(PHANDLE Lock)
     if (!*Lock) {
         NtCreateMutant(Lock, MUTANT_ALL_ACCESS, NULL, FALSE);
     }
+    if (*Lock) NtWaitForSingleObject(*Lock, FALSE, NULL);
 }
 
 static VOID
@@ -142,7 +143,7 @@ NttyPushInputChar(PNTTY_IBUF IBuf, UCHAR Ch)
     if (!IBuf) return STATUS_INVALID_PARAMETER;
     if (IBuf->count >= NTTY_IBUF_SIZE) return STATUS_BUFFER_OVERFLOW;
 
-    NtlyAcquireLock(&IBuf->lock);
+    NttyAcquireLock(&IBuf->lock);
 
     IBuf->buf[IBuf->tail] = Ch;
     IBuf->tail = (IBuf->tail + 1) % NTTY_IBUF_SIZE;
@@ -579,7 +580,7 @@ NttyShutdown(VOID)
 
     Device = g_ntty_subsystem.device_list;
     while (Device) {
-        Next = (PNTTY_DEVICE)Device + 1;  /* Assuming linked list or array */
+        Next = Device->next;
         NttyCloseDevice(Device);
         Device = Next;
     }
@@ -619,10 +620,13 @@ NttyCreateDevice(
     Device->ref_count = 1;
 
     if (DeviceName) {
-        /* Copy device name */
-        UNICODE_STRING Name;
-        RtlInitUnicodeString(&Name, DeviceName);
-        /* Copy to Device->device_name */
+        /* Copy the device name into the fixed-size device record. */
+        ULONG i = 0;
+        while (DeviceName[i] && i + 1 < sizeof(Device->device_name) / sizeof(Device->device_name[0])) {
+            Device->device_name[i] = DeviceName[i];
+            ++i;
+        }
+        Device->device_name[i] = 0;
     }
 
     /* Initialize termios */
@@ -646,6 +650,7 @@ NttyCreateDevice(
 
     /* Set default line discipline */
     Device->line_disc = &g_ntty_cooked_disc;
+    NtCreateMutant(&Device->control_lock, MUTANT_ALL_ACCESS, NULL, FALSE);
 
     /* Create synchronization events */
     Status = NtCreateEvent(&Device->input_ready_event, 
@@ -664,6 +669,11 @@ NttyCreateDevice(
         return Status;
     }
 
+    NttyAcquireLock(&g_ntty_subsystem.list_lock);
+    Device->next = g_ntty_subsystem.device_list;
+    g_ntty_subsystem.device_list = Device;
+    NttyReleaseLock(g_ntty_subsystem.list_lock);
+
     *OutDevice = Device;
     return STATUS_SUCCESS;
 }
@@ -678,6 +688,13 @@ NttyCloseDevice(
     InterlockedDecrement(&Device->ref_count);
 
     if (Device->ref_count <= 0) {
+        PNTTY_DEVICE *link;
+        NttyAcquireLock(&g_ntty_subsystem.list_lock);
+        for (link = &g_ntty_subsystem.device_list; *link; link = &(*link)->next) {
+            if (*link == Device) { *link = Device->next; break; }
+        }
+        if (g_ntty_subsystem.device_count) --g_ntty_subsystem.device_count;
+        NttyReleaseLock(g_ntty_subsystem.list_lock);
         if (Device->device_handle) {
             NtClose(Device->device_handle);
         }
@@ -820,10 +837,16 @@ NttyIoctl(
     PULONG BytesReturned
 )
 {
+    NTSTATUS status;
+    PVOID data = InputBuffer ? InputBuffer : OutputBuffer;
     if (!Device) return STATUS_INVALID_PARAMETER;
+    if (!data || (!InputBuffer && !OutputBuffer)) return STATUS_INVALID_PARAMETER;
     if (!Device->line_disc || !Device->line_disc->ioctl) return STATUS_NOT_SUPPORTED;
-
-    return Device->line_disc->ioctl(Device, ControlCode, InputBuffer);
+    status = Device->line_disc->ioctl(Device, ControlCode, data);
+    if (BytesReturned) *BytesReturned = NT_SUCCESS(status) ?
+        (OutputBuffer ? OutputLength : 0) : 0;
+    (void)InputLength;
+    return status;
 }
 
 /* ===== Signal/Control Operations ===== */

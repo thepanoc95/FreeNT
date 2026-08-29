@@ -427,6 +427,9 @@ extern char *freent_strrchr(const char *s, int c);
 extern char *freent_strstr(const char *haystack, const char *needle);
 extern char *freent_strtok(char *s, const char *delim);
 extern char *freent_strdup(const char *s);
+extern size_t freent_strspn(const char *s, const char *accept);
+extern size_t freent_strcspn(const char *s, const char *reject);
+extern char *freent_strpbrk(const char *s, const char *accept);
 
 /* Wide string functions */
 extern size_t freent_wcslen(const WCHAR *s);
@@ -441,6 +444,14 @@ extern long  freent_atol(const char *nptr);
 extern long long freent_atoll(const char *nptr);
 extern int   freent_abs(int j);
 extern long  freent_labs(long j);
+extern void *freent_malloc(size_t size);
+extern void freent_free(void *ptr);
+extern void *freent_calloc(size_t count, size_t size);
+extern void *freent_realloc(void *ptr, size_t size);
+extern void *freent_bsearch(const void *key, const void *base, size_t count, size_t size,
+                            int (*compar)(const void *, const void *));
+extern int freent_rand(void);
+extern void freent_srand(unsigned int seed);
 
 /* Sorting */
 extern void freent_qsort(void *base, size_t nmemb, size_t size,
@@ -638,6 +649,9 @@ extern char *strrchr(const char *s, int c);
 extern char *strstr(const char *haystack, const char *needle);
 extern char *strtok(char *s, const char *delim);
 extern char *strdup(const char *s);
+extern size_t strspn(const char *s, const char *accept);
+extern size_t strcspn(const char *s, const char *reject);
+extern char *strpbrk(const char *s, const char *accept);
 
 extern size_t wcslen(const WCHAR *s);
 extern int   wcscmp(const WCHAR *s1, const WCHAR *s2);
@@ -650,6 +664,14 @@ extern long  atol(const char *nptr);
 extern long long atoll(const char *nptr);
 extern int   abs(int j);
 extern long  labs(long j);
+extern void *malloc(size_t size);
+extern void free(void *ptr);
+extern void *calloc(size_t count, size_t size);
+extern void *realloc(void *ptr, size_t size);
+extern void *bsearch(const void *key, const void *base, size_t count, size_t size,
+                     int (*compar)(const void *, const void *));
+extern int rand(void);
+extern void srand(unsigned int seed);
 extern void  qsort(void *base, size_t nmemb, size_t size, int (*compar)(const void *, const void *));
 
 extern int snprintf(char *buffer, size_t size, const char *format, ...);

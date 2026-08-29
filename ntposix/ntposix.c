@@ -752,6 +752,51 @@ nposix_write(
 }
 
 /* ------------------------------------------------------------------ */
+/* lseek and descriptor duplication                                   */
+/* ------------------------------------------------------------------ */
+
+long
+nposix_lseek(int fd, long offset, int whence)
+{
+    HANDLE handle = fd_handle(fd);
+    FILE_POSITION_INFORMATION position;
+    FILE_STANDARD_INFORMATION standard;
+    IO_STATUS_BLOCK iosb;
+    NTSTATUS status;
+
+    if (!handle) return -9;
+    if (whence == SEEK_SET) position.CurrentByteOffset.QuadPart = offset;
+    else if (whence == SEEK_CUR) {
+        status = NtQueryInformationFile(handle, &iosb, &position, sizeof(position), FilePositionInformation);
+        if (!NT_SUCCESS(status)) return -nt_to_errno(status);
+        position.CurrentByteOffset.QuadPart += offset;
+    } else if (whence == SEEK_END) {
+        status = NtQueryInformationFile(handle, &iosb, &standard, sizeof(standard), FileStandardInformation);
+        if (!NT_SUCCESS(status)) return -nt_to_errno(status);
+        position.CurrentByteOffset.QuadPart = standard.EndOfFile.QuadPart + offset;
+    } else return -22;
+    if (position.CurrentByteOffset.QuadPart < 0) return -22;
+    status = NtSetInformationFile(handle, &iosb, &position, sizeof(position), FilePositionInformation);
+    if (!NT_SUCCESS(status)) return -nt_to_errno(status);
+    return (long)position.CurrentByteOffset.QuadPart;
+}
+
+int
+nposix_dup(int fd)
+{
+    HANDLE source = fd_handle(fd), duplicate = NULL;
+    NTSTATUS status;
+    int newfd;
+    if (!source) return -9;
+    status = NtDuplicateObject((HANDLE)(-1LL), source, (HANDLE)(-1LL),
+                               &duplicate, 0, 0, DUPLICATE_SAME_ACCESS);
+    if (!NT_SUCCESS(status)) return -nt_to_errno(status);
+    newfd = fd_alloc(duplicate, Fds[fd].Flags);
+    if (newfd < 0) { NtClose(duplicate); return -24; }
+    return newfd;
+}
+
+/* ------------------------------------------------------------------ */
 /* fstat                                                               */
 /* ------------------------------------------------------------------ */
 
